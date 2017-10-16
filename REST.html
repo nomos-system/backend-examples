@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>REST API Example</title>
+        <meta charset="UTF-8">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript">
+            var APIHOST = 'http://HOST:PORT/api/v1/';
+
+            function init() {
+                // TODO: (Optional) Show authorization dialog or get credentials
+                var username = 'EXAMPLE';
+                var password = 'EXAMPLE';
+
+                $.ajaxSetup({
+                    headers: {
+                        'auth-username': username,
+                        'auth-password': password
+                    },
+                    crossDomain: true,
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                });
+
+                log('emit init', 'out');
+                $.get(APIHOST + 'init', {uagent: navigator.userAgent, language: 'en'}, function(data) {
+                    log('ready ' + JSON.stringify(data), 'in');
+                }).done(function(e) {
+                    // successful
+                    log('emit getVersion', 'out');
+                    $.get(APIHOST + 'getVersion', {}, function(data) {
+                        log('getVersion ' + JSON.stringify(data), 'in');
+                    }).fail(failLog);
+
+                    log('emit getCloudStatus', 'out');
+                    $.get(APIHOST + 'getCloudStatus', {}, function(data) {
+                        log('getCloudStatus ' + JSON.stringify(data), 'in');
+                    }).fail(failLog);
+
+                    log('emit getAllComponents', 'out');
+                    $.get(APIHOST + 'getAllComponents', {}, function(data) {
+                        log('getAllComponents ' + JSON.stringify(data), 'in');
+                        var cids = data.map(function(c) {
+                            return c.cid;
+                        });
+
+                        log('starting Polling getComponentInitData', 'info');
+                        var counter = 20;
+                        var intervalTimer = setInterval(function() {
+                            var randomCid = cids[Math.floor((Math.random() * cids.length) + 1)];
+                            log('emit getComponentInitData ' + randomCid, 'out');
+                            $.post(APIHOST + 'getComponentInitData', {cid: [randomCid]}, function(data) {
+                                log('getComponentInitData ' + randomCid + ': ' + JSON.stringify(data), 'in');
+                            }).fail(failLog);
+
+                            counter--;
+                            if(counter === 0) {
+                                log('stopped Polling getComponentInitData', 'info');
+                                clearInterval(intervalTimer);
+                            }
+                        }, 2000);
+                    }).fail(failLog);
+
+                }).fail(failLog);
+            }
+
+            function failLog(err) {
+                log(err.status + '/' + err.statusText + ': ' + (JSON.stringify(err.responseJSON) || ''), 'error');
+            }
+
+            function log(txt, type) {
+                if(txt.length > 400) txt = txt.substring(0, 400) + ' ... etc.';
+                document.getElementById('log').innerHTML += '<li class="' + type + '">' + txt + '</li>';
+                console.log(txt);
+            }
+        </script>
+        <style type="text/css">
+            .in {
+                color: green;
+            }
+            .in:before {
+                content: "« ";
+            }
+            .out {
+                color: orange;
+            }
+            .out:before {
+                content: "» ";
+            }
+            .error {
+                color: red;
+            }
+        </style>
+    </head>
+
+    <body onload="init()">
+        <h1>nomos system AG - REST API Example</h1>
+        For further informations see <a target="_blank" href="http://apidocs.nomos-system.com">API Documentation</a>.
+        <ul id="log" style="font-family: Courier"></ul>
+    </body>
+</html>
