@@ -69,7 +69,7 @@
                         failLog(err);
                         if(err.responseJSON.errorCode === 110) {
                             log('emit auth', 'out');
-                            $.post(APIHOST + 'auth', {username: username, password: password, uagent: navigator.userAgent, language: 'en'}, function(data) {
+                            $.post(APIHOST + 'auth', {username: username, password: password, persistent: true, uagent: navigator.userAgent, language: 'en'}, function(data) {
                                 log('auth ' + JSON.stringify(data), 'in');
                                 sessionId = data.sessionId;
                                 setupAjax();
