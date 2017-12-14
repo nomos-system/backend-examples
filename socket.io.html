@@ -63,7 +63,7 @@
                         var password = 'EXAMPLE';
 
                         log('emit user auth credentials', 'out');
-                        socket.emit('auth', {username: username, password: password}, function (auth) {
+                        socket.emit('auth', {username: username, password: password, persistent: false}, function (auth) {
                             if (auth === true) {
                                 // successful
                                 log('user auth successful');
