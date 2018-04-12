@@ -37,25 +37,6 @@
                 socket.on('stateChange', function(result) {
                     log('on stateChange ' + JSON.stringify(result), 'in');
 
-                    // Handling API Password Authorization
-                    if (result.state == 'Authorization needed for API' && result.part == 'app') {
-                        // TODO: Show authorization dialog or get password
-                        var apiPassword = 'EXAMPLE';
-
-                        log('emit api auth password', 'out');
-                        socket.emit('auth', {password: apiPassword}, function (auth) {
-                            if (auth === true) {
-                                // successful
-                                log('api auth successful');
-                                socketInitialization();
-                            }
-                            else {
-                                // not successful
-                                log('api auth not successful', 'error');
-                            }
-                        });
-                    }
-
                     // Handling User Password Authorization
                     else if (result.state == 'User Authorization needed' && result.part == 'app') {
                         // TODO: Show authorization dialog or get credentials
